@@ -1,0 +1,14 @@
+{
+  "name": "Ngalutfota Lolumanti",
+  "short_name": "Ngalutfota",
+  "description": "Listening tracker for the Ligwalagwala FM radio drama",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06070c",
+  "theme_color": "#06070c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

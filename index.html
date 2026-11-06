@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#06070c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eef1f8" media="(prefers-color-scheme: light)">
+<title>Ngalutfota Lolumanti</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ngalutfota">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --bg: #06070c;
+    --bg2: #0b0e18;
+    --glass: rgba(255,255,255,.045);
+    --glass-hi: rgba(255,255,255,.08);
+    --edge: rgba(140,170,255,.16);
+    --edge-hi: rgba(120,220,255,.45);
+    --text: #e9edf7;
+    --muted: #8a93ab;
+    --dim: #5b6379;
+    --c1: #22e4ff;      /* cyan */
+    --c2: #8b5cff;      /* violet */
+    --c3: #ff4fd8;      /* magenta */
+    --ok: #3dffb0;
+    --grad: linear-gradient(110deg, var(--c1), var(--c2) 55%, var(--c3));
+    --glow: 0 0 24px rgba(34,228,255,.35), 0 0 60px rgba(139,92,255,.18);
+    --grid: rgba(120,150,255,.06);
+    --aur1: rgba(34,228,255,.20);
+    --aur2: rgba(139,92,255,.24);
+    --aur3: rgba(255,79,216,.14);
+    --mono: ui-monospace, "JetBrains Mono", "Cascadia Code", "SF Mono", Consolas, monospace;
+    --on-accent: #05060a;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #eef1f8; --bg2: #e4e8f3;
+      --glass: rgba(255,255,255,.62); --glass-hi: rgba(255,255,255,.85);
+      --edge: rgba(80,90,160,.16); --edge-hi: rgba(90,70,230,.45);
+      --text: #12162a; --muted: #586079; --dim: #8b92a8;
+      --c1: #0098c7; --c2: #6a3dff; --c3: #d6249f; --ok: #00a870;
+      --glow: 0 6px 24px rgba(106,61,255,.18);
+      --grid: rgba(60,70,160,.07);
+      --aur1: rgba(0,180,230,.16); --aur2: rgba(106,61,255,.16); --aur3: rgba(214,36,159,.10);
+      --on-accent: #ffffff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text); background: var(--bg);
+    font: 15.5px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 0 16px calc(190px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+  /* aurora + grid backdrop */
+  body::before, body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+  body::before {
+    background:
+      radial-gradient(40vmax 40vmax at 12% 8%, var(--aur1), transparent 60%),
+      radial-gradient(45vmax 45vmax at 92% 22%, var(--aur2), transparent 60%),
+      radial-gradient(40vmax 40vmax at 50% 105%, var(--aur3), transparent 60%),
+      linear-gradient(180deg, var(--bg), var(--bg2));
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+  body::after {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%);
+  }
+  @keyframes drift { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(-3%,2%,0) scale(1.08); } }
+
+  main { max-width: 760px; margin: 0 auto; }
+
+  /* header */
+  header { display: flex; align-items: center; gap: 14px; padding: calc(26px + env(safe-area-inset-top)) 0 18px; }
+  .logo {
+    width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center;
+    background: var(--glass); border: 1px solid var(--edge); box-shadow: var(--glow);
+  }
+  .eq { display: flex; gap: 3px; align-items: flex-end; height: 20px; }
+  .eq i { width: 4px; border-radius: 2px; background: var(--grad); height: 30%; }
+  body.playing .eq i { animation: eq 1s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: -.3s !important; height: 70%; }
+  .eq i:nth-child(3) { animation-delay: -.6s !important; height: 45%; }
+  .eq i:nth-child(4) { animation-delay: -.15s !important; height: 85%; }
+  @keyframes eq { 0%,100% { height: 25%; } 50% { height: 100%; } }
+  h1 {
+    margin: 0; font-size: 1.5rem; letter-spacing: -.01em; line-height: 1.1;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .tag { font: 500 .72rem/1.4 var(--mono); color: var(--muted); letter-spacing: .14em; text-transform: uppercase; margin-top: 4px; }
+  .chip {
+    margin-left: auto; font: 500 .68rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    border: 1px solid var(--edge); background: var(--glass); padding: 7px 10px; border-radius: 99px; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  /* glass panels */
+  .card {
+    position: relative; background: var(--glass); border: 1px solid var(--edge); border-radius: 20px;
+    padding: 18px; margin: 0 0 14px;
+    backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+  .card::before { /* top light edge */
+    content: ""; position: absolute; left: 18px; right: 18px; top: -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--edge-hi), transparent);
+  }
+  h2 { margin: 0 0 12px; font: 600 .72rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  h2::before { content: "// "; color: var(--c1); }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 22px; overflow: hidden; }
+  .hero::after {
+    content: ""; position: absolute; inset: -40% -10% auto auto; width: 60%; height: 140%; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(139,92,255,.18), transparent); filter: blur(10px);
+  }
+  .up-ep {
+    margin: 0 0 4px; font: 700 clamp(2.2rem, 9vw, 3.4rem)/1 var(--mono); letter-spacing: -.03em;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .up-ep::before { content: "EP "; font-size: .38em; letter-spacing: .1em; vertical-align: .9em; -webkit-text-fill-color: var(--muted); }
+  .up-ep.caught { font-size: 1.8rem; }
+  .up-ep.caught::before { content: none; }
+  .ring { width: 118px; height: 118px; position: relative; flex: none; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 7; }
+  .ring .track { stroke: var(--edge); }
+  .ring .arc { stroke: url(#rg); stroke-linecap: round; stroke-dasharray: 301.6; stroke-dashoffset: 301.6; transition: stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 0 6px rgba(34,228,255,.55)); }
+  .ring .lbl { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+  .ring b { font: 700 1.35rem/1 var(--mono); }
+  .ring small { font: .62rem/1.6 var(--mono); color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+
+  /* text helpers */
+  .meta { color: var(--muted); font-size: .88rem; }
+  .resume { color: var(--c1); font-family: var(--mono); font-size: .82rem; }
+  .msg { font: .8rem/1.5 var(--mono); color: var(--muted); margin-top: 10px; min-height: 1.2em; }
+  .msg:not(:empty)::before { content: "> "; color: var(--c1); }
+  a { color: var(--c1); }
+
+  /* buttons */
+  button, .btn {
+    font: 500 .9rem/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text);
+    background: var(--glass-hi); border: 1px solid var(--edge); border-radius: 12px;
+    padding: 10px 15px; min-height: 42px; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: border-color .2s, box-shadow .2s, transform .1s, background .2s;
+  }
+  button:hover:not(:disabled), .btn:hover { border-color: var(--edge-hi); box-shadow: 0 0 0 3px rgba(34,228,255,.08), var(--glow); }
+  button:active:not(:disabled) { transform: translateY(1px) scale(.99); }
+  button:focus-visible, .btn:focus-visible, input:focus-visible { outline: 2px solid var(--c1); outline-offset: 2px; }
+  button.primary {
+    background: var(--grad); background-size: 200% 100%; color: var(--on-accent); border: 0; font-weight: 700;
+    box-shadow: var(--glow); animation: sheen 6s linear infinite;
+  }
+  @keyframes sheen { to { background-position: -200% 0; } }
+  button:disabled { opacity: .4; cursor: default; }
+  button.small, .btn.small { padding: 6px 11px; min-height: 34px; font-size: .8rem; border-radius: 10px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  /* progress */
+  .stat { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  #countText { font: 700 1.05rem/1.2 var(--mono); }
+  .bar { height: 8px; background: var(--edge); border-radius: 99px; overflow: hidden; margin: 14px 0 8px; position: relative; }
+  .bar > div { height: 100%; width: 0; background: var(--grad); border-radius: 99px; box-shadow: 0 0 14px rgba(34,228,255,.6); transition: width .8s cubic-bezier(.2,.8,.2,1); position: relative; overflow: hidden; }
+  .bar > div::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); transform: translateX(-100%); animation: scan 2.6s ease-in-out infinite; }
+  @keyframes scan { to { transform: translateX(100%); } }
+  #pctText { font-family: var(--mono); font-size: .8rem; }
+
+  input[type=number] {
+    font: 600 1rem var(--mono); width: 8em; padding: 9px 12px; min-height: 42px; border-radius: 12px;
+    border: 1px solid var(--edge); background: rgba(0,0,0,.18); color: var(--text);
+  }
+  @media (prefers-color-scheme: light) { input[type=number] { background: rgba(255,255,255,.7); } }
+
+  /* list */
+  details.group { border-top: 1px solid var(--edge); }
+  details.group:first-of-type { border-top: 0; }
+  details.group > summary {
+    list-style: none; padding: 13px 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    font: 600 .92rem var(--mono);
+  }
+  details.group > summary::-webkit-details-marker { display: none; }
+  details.group > summary::before { content: "▸"; color: var(--c1); transition: transform .2s; display: inline-block; margin-right: 8px; }
+  details.group[open] > summary::before { transform: rotate(90deg); }
+  details.group > summary span { margin-left: auto; color: var(--muted); font-weight: 400; font-size: .8rem; }
+  .ep { display: flex; gap: 12px; align-items: flex-start; padding: 10px 8px; border-radius: 12px; margin: 2px 0; transition: background .2s; }
+  .ep:hover { background: var(--glass); }
+  .ep .body { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .ep .body > div:first-child { flex: 1 1 260px; min-width: 0; }
+  .ep .body .acts { margin-top: 0; }
+  .ep .num { font: 600 .95rem var(--mono); }
+  .ep.done .num { color: var(--dim); text-decoration: line-through; text-decoration-color: var(--dim); }
+  .ep.done .meta { color: var(--dim); }
+  .ep.next { background: linear-gradient(90deg, rgba(34,228,255,.10), rgba(139,92,255,.06) 60%, transparent); box-shadow: inset 2px 0 0 var(--c1); }
+  .ep .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .gaprow { padding: 7px 8px 7px 44px; color: var(--dim); font: .76rem var(--mono); letter-spacing: .04em; }
+  .gaprow::before { content: "∅ "; color: var(--c3); opacity: .7; }
+
+  /* neon checkbox */
+  .ep input[type=checkbox] {
+    appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; margin: 2px 0 0; cursor: pointer;
+    border-radius: 7px; border: 1.5px solid var(--edge-hi); background: transparent; display: grid; place-content: center;
+    transition: background .2s, box-shadow .2s;
+  }
+  .ep input[type=checkbox]::after { content: ""; width: 10px; height: 6px; border: 2.5px solid var(--on-accent); border-top: 0; border-right: 0; transform: rotate(-45deg) scale(0); margin-top: -2px; transition: transform .15s; }
+  .ep input[type=checkbox]:checked { background: var(--grad); border-color: transparent; box-shadow: 0 0 12px rgba(34,228,255,.5); }
+  .ep input[type=checkbox]:checked::after { transform: rotate(-45deg) scale(1); }
+
+  ul.plain { padding-left: 18px; margin: 8px 0; font-size: .88rem; }
+  ul.plain li { margin: 4px 0; overflow-wrap: anywhere; }
+  details.card > summary { cursor: pointer; font: 600 .72rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); list-style: none; }
+  details.card > summary::-webkit-details-marker { display: none; }
+  details.card > summary::before { content: "+ "; color: var(--c1); }
+  details.card[open] > summary::before { content: "− "; }
+  details.card[open] > summary { margin-bottom: 10px; }
+
+  /* player dock */
+  #player {
+    position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 5;
+    max-width: 760px; margin: 0 auto; display: none;
+    background: rgba(12,15,26,.72); border: 1px solid var(--edge-hi); border-radius: 22px; padding: 12px 14px;
+    backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45), var(--glow);
+  }
+  @media (prefers-color-scheme: light) { #player { background: rgba(255,255,255,.78); box-shadow: 0 16px 40px rgba(40,40,90,.18); } }
+  #player.on { display: block; animation: rise .35s cubic-bezier(.2,.8,.2,1); }
+  @keyframes rise { from { transform: translateY(20px); opacity: 0; } }
+  .ptop { display: flex; align-items: center; gap: 10px; }
+  #playerTitle { font: 600 .85rem var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  #player audio { width: 100%; height: 40px; margin: 8px 0; }
+  #closePlayer { margin-left: auto; }
+
+  @media (max-width: 520px) {
+    header { flex-wrap: wrap; }
+    .chip { margin-left: 0; order: 3; }
+    .hero { grid-template-columns: 1fr; }
+    .ring { width: 96px; height: 96px; position: absolute; top: 18px; right: 18px; }
+    .ring b { font-size: 1.1rem; }
+    .hero #upNextBody .meta { padding-right: 104px; }
+    .hero h2 { margin-bottom: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true"><div class="eq"><i></i><i></i><i></i><i></i></div></div>
+    <div>
+      <h1>Ngalutfota Lolumanti</h1>
+      <div class="tag">Ligwalagwala FM · Listening tracker</div>
+    </div>
+    <span class="chip" id="statusChip">Syncing</span>
+  </header>
+
+  <section class="card hero" id="upNext">
+    <div>
+      <h2>Up next</h2>
+      <div id="upNextBody" class="meta">Loading catalogue…</div>
+    </div>
+    <div class="ring" aria-hidden="true">
+      <svg viewBox="0 0 110 110">
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--c1)"/><stop offset=".55" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c3)"/></linearGradient></defs>
+        <circle class="track" cx="55" cy="55" r="48"/>
+        <circle class="arc" id="ringArc" cx="55" cy="55" r="48"/>
+      </svg>
+      <div class="lbl"><b id="ringPct">0%</b><small>complete</small></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Progress</h2>
+    <div class="row" style="justify-content:space-between">
+      <div class="stat"><span id="countText">–</span></div>
+      <button class="small" id="undoBtn" disabled>Undo</button>
+    </div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="meta" id="pctText"></div>
+    <div class="msg" id="actionMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>Already partway?</h2>
+    <form class="row" id="partwayForm">
+      <label for="partwayInput" class="meta">Next episode to listen to</label>
+      <input type="number" id="partwayInput" inputmode="numeric" placeholder="1500">
+      <button type="submit">Mark earlier as finished</button>
+    </form>
+    <div class="msg" id="partwayMsg"></div>
+  </section>
+
+  <section class="card">
+    <div class="row" style="justify-content:space-between; margin-bottom:6px">
+      <h2 style="margin:0">All episodes</h2>
+      <button class="small" id="jumpBtn">Jump to up next</button>
+    </div>
+    <div id="list"></div>
+  </section>
+
+  <details class="card" id="olderBox">
+    <summary>Older short clips</summary>
+    <div id="older"></div>
+  </details>
+
+  <details class="card" id="excludedBox">
+    <summary>Excluded clips (no episode number)</summary>
+    <div id="excluded"></div>
+  </details>
+
+  <section class="card">
+    <h2>Catalogue</h2>
+    <div class="meta" id="catInfo" style="font-family:var(--mono);font-size:.8rem">–</div>
+    <div class="row" style="margin-top:12px">
+      <button id="refreshBtn">Check for new episodes</button>
+      <button id="exportBtn" class="small">Back up progress</button>
+      <label class="btn small" for="importFile">Restore backup</label>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </div>
+    <div class="msg" id="refreshMsg"></div>
+  </section>
+</main>
+
+<div id="player">
+  <div class="ptop">
+    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div id="playerTitle"></div>
+  </div>
+  <audio id="audio" controls preload="metadata"></audio>
+  <div class="row">
+    <button class="small" id="back15">−15s</button>
+    <button class="small" id="fwd30">+30s</button>
+    <button class="small" id="rateBtn">1×</button>
+    <button class="small" id="closePlayer">Close</button>
+  </div>
+</div>
+
+<script src="catalogue.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
