@@ -83,9 +83,43 @@
   main { max-width: 760px; margin: 0 auto; }
 
   /* header */
-  header { display: flex; align-items: center; gap: 14px; padding: calc(26px + env(safe-area-inset-top)) 0 18px; }
+  /* sticky navbar */
+  .nav {
+    position: sticky; top: 0; z-index: 6; margin: 0 -16px 18px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    background: linear-gradient(180deg, rgba(6,7,12,.82), rgba(6,7,12,.55));
+    backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid var(--edge);
+  }
+  @media (prefers-color-scheme: light) { .nav { background: linear-gradient(180deg, rgba(238,241,248,.88), rgba(238,241,248,.6)); } }
+  .nav::after { /* glowing underline */
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: var(--grad); opacity: .55; background-size: 200% 100%; animation: sheen 8s linear infinite;
+  }
+  header { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .brand { min-width: 0; }
+  .presents {
+    display: inline-flex; align-items: center; gap: 6px; margin-bottom: 3px;
+    font: 600 .66rem/1.2 var(--mono); letter-spacing: .2em; text-transform: uppercase;
+    background: linear-gradient(90deg, var(--muted) 0%, var(--muted) 35%, var(--c1) 45%, var(--c3) 55%, var(--muted) 65%, var(--muted) 100%);
+    background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shimmer 5s ease-in-out infinite;
+  }
+  .presents b { font-weight: 800; letter-spacing: .14em; }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
+  .spark { display: inline-block; color: var(--c1); -webkit-text-fill-color: var(--c1); animation: twinkle 2.4s ease-in-out infinite; font-size: .9em; }
+  .spark:last-child { color: var(--c3); -webkit-text-fill-color: var(--c3); animation-delay: -1.2s; }
+  @keyframes twinkle { 0%,100% { transform: scale(.7) rotate(0); opacity: .5; } 50% { transform: scale(1.15) rotate(45deg); opacity: 1; } }
+  .navlinks { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .navlinks a {
+    font: 600 .74rem/1 var(--mono); letter-spacing: .06em; color: var(--muted); text-decoration: none;
+    padding: 8px 12px; border-radius: 99px; border: 1px solid transparent; transition: color .2s, border-color .2s, background .2s, box-shadow .2s;
+    white-space: nowrap;
+  }
+  .navlinks a:hover { color: var(--text); border-color: var(--edge); }
+  .navlinks a.on { color: var(--text); border-color: var(--edge-hi); background: var(--glass-hi); box-shadow: 0 0 14px rgba(34,228,255,.18); }
+  main > section, main > details { scroll-margin-top: 110px; }
   .logo {
-    width: 46px; height: 46px; border-radius: 14px; flex: none; display: grid; place-items: center;
+    width: 42px; height: 42px; border-radius: 14px; flex: none; display: grid; place-items: center;
     background: var(--glass); border: 1px solid var(--edge); box-shadow: var(--glow);
   }
   .eq { display: flex; gap: 3px; align-items: flex-end; height: 20px; }
@@ -96,7 +130,7 @@
   .eq i:nth-child(4) { animation-delay: -.15s !important; height: 85%; }
   @keyframes eq { 0%,100% { height: 25%; } 50% { height: 100%; } }
   h1 {
-    margin: 0; font-size: 1.5rem; letter-spacing: -.01em; line-height: 1.1;
+    margin: 0; font-size: 1.3rem; letter-spacing: -.01em; line-height: 1.1; white-space: nowrap;
     background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
   }
   .tag { font: 500 .72rem/1.4 var(--mono); color: var(--muted); letter-spacing: .14em; text-transform: uppercase; margin-top: 4px; }
@@ -244,8 +278,11 @@
   #closePlayer { margin-left: auto; }
 
   @media (max-width: 520px) {
-    header { flex-wrap: wrap; }
-    .chip { margin-left: 0; order: 3; }
+    header { flex-wrap: wrap; row-gap: 8px; }
+    .navlinks { margin-left: 0; width: 100%; justify-content: space-between; }
+    .navlinks a { flex: 1; text-align: center; padding: 8px 6px; }
+    h1 { font-size: 1.15rem; }
+    .presents { font-size: .6rem; letter-spacing: .16em; }
     .hero { grid-template-columns: 1fr; }
     .ring { width: 96px; height: 96px; position: absolute; top: 18px; right: 18px; }
     .ring b { font-size: 1.1rem; }
@@ -258,15 +295,25 @@
 </style>
 </head>
 <body>
-<main>
+<div class="nav">
   <header>
     <div class="logo" aria-hidden="true"><div class="eq"><i></i><i></i><i></i><i></i></div></div>
-    <div>
+    <div class="brand">
+      <div class="presents"><span class="spark" aria-hidden="true">✦</span><span><b>Tebogo Mahlalela</b> presents</span><span class="spark" aria-hidden="true">✦</span></div>
       <h1>Ngalutfota Lolumanti</h1>
-      <div class="tag">Ligwalagwala FM · Listening tracker</div>
     </div>
-    <span class="chip" id="statusChip">Syncing</span>
+    <nav class="navlinks" aria-label="Sections">
+      <a href="#upNext" class="on">Up next</a>
+      <a href="#episodes">Episodes</a>
+      <a href="#olderBox">More</a>
+    </nav>
   </header>
+</div>
+<main>
+  <div class="row" style="justify-content:space-between; margin:-4px 0 14px">
+    <div class="tag">Ligwalagwala FM · Listening tracker</div>
+    <span class="chip" id="statusChip">Syncing</span>
+  </div>
 
   <section class="card hero" id="upNext">
     <div>
@@ -304,7 +351,7 @@
     <div class="msg" id="partwayMsg"></div>
   </section>
 
-  <section class="card">
+  <section class="card" id="episodes">
     <div class="row" style="justify-content:space-between; margin-bottom:6px">
       <h2 style="margin:0">All episodes</h2>
       <button class="small" id="jumpBtn">Jump to up next</button>

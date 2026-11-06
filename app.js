@@ -339,6 +339,33 @@
     this.value = '';
   };
 
+  // ---------- navbar: highlight the section in view ----------
+  (function () {
+    var links = [].slice.call(document.querySelectorAll('.navlinks a'));
+    function update() {
+      var y = window.scrollY + 140, active = links[0];
+      links.forEach(function (a) {
+        var el = document.querySelector(a.getAttribute('href'));
+        if (el && el.getBoundingClientRect().top + window.scrollY <= y) active = a;
+      });
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) active = links[links.length - 1];
+      links.forEach(function (a) { a.classList.toggle('on', a === active); });
+    }
+    var queued = false;
+    window.addEventListener('scroll', function () {
+      if (queued) return; queued = true;
+      requestAnimationFrame(function () { queued = false; update(); });
+    }, { passive: true });
+    links.forEach(function (a) {
+      a.addEventListener('click', function (ev) {
+        var el = document.querySelector(a.getAttribute('href'));
+        if (!el) return;
+        ev.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  })();
+
   // ---------- start ----------
   var cached = NL.loadCachedClips(store);
   if (cached && cached.clips && cached.clips.length) {
