@@ -10,6 +10,16 @@
   })();
 
   var progress = NL.loadProgress(store);
+
+  // Per-device preferences (kept apart from progress so backups/restores don't touch them).
+  var SETTINGS_KEY = 'nl.settings.v1';
+  var settings = (function () { try { return JSON.parse(store.getItem(SETTINGS_KEY)) || {}; } catch (e) { return {}; } })();
+  function saveSettings() { try { store.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
+  function syncAutoToggles() {
+    var ts = document.querySelectorAll('.autoToggle');
+    for (var i = 0; i < ts.length; i++) ts[i].checked = !!settings.autoplay;
+  }
+  syncAutoToggles();
   var cat = null;
   var fetchedAt = null;
   var current = null;          // { num, idx } currently loaded in the player
@@ -250,6 +260,13 @@
     var num = current.num;
     delete progress.pos[String(num)];
     act([num], true, 'Finished episode ' + num);
+    if (settings.autoplay) {
+      var nx = NL.firstUnfinished(cat, progress);
+      if (nx) {
+        play(nx.num, resumeOf(nx.num) ? resumeOf(nx.num).i : nx.primary);
+        say('actionMsg', 'Finished episode ' + num + ' · auto-playing episode ' + nx.num);
+      }
+    }
   });
   window.addEventListener('pagehide', function () { savePos(true); });
   document.addEventListener('visibilitychange', function () { if (document.hidden) savePos(true); });
@@ -282,6 +299,12 @@
 
   document.addEventListener('change', function (ev) {
     var t = ev.target;
+    if (t.classList && t.classList.contains('autoToggle')) {
+      settings.autoplay = t.checked;
+      saveSettings(); syncAutoToggles();
+      say('actionMsg', t.checked ? 'Auto-play on: the next unfinished episode starts when one ends.' : 'Auto-play off: playback stops after each episode.');
+      return;
+    }
     if (!t.hasAttribute || !t.hasAttribute('data-check')) return;
     var num = +t.getAttribute('data-check');
     act([num], t.checked, (t.checked ? 'Ticked' : 'Unticked') + ' episode ' + num);

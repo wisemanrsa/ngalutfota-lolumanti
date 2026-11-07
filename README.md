@@ -24,7 +24,8 @@ Upload `index.html`, `app.js`, `catalogue.js`, `manifest.json` and the `icons/` 
 
 - Audio keeps playing with the screen locked or the app in the background.
 - Lock screen / notification / Bluetooth / car controls: play, pause, −15s, +30s, seek bar.
-- No auto-play: when an episode ends it is marked finished and playback stops.
+- When an episode ends it is marked finished. The **Auto-play next** switch (Up next card and player bar,
+  off by default, saved per device) decides whether the next unfinished episode then starts or playback stops.
 - Progress is per device. Move it with **Back up progress** (PC) and **Restore backup** (phone).
   On iPhone, restore inside the home-screen app, since it has its own storage separate from Safari.
 

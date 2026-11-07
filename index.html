@@ -277,6 +277,26 @@
   #player audio { width: 100%; height: 40px; margin: 8px 0; }
   #closePlayer { margin-left: auto; }
 
+  /* toggle switch */
+  .switch { position: relative; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font: 600 .8rem var(--mono); color: var(--muted); letter-spacing: .04em; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch .knob {
+    position: relative; width: 42px; height: 24px; border-radius: 99px; flex: none;
+    background: var(--glass-hi); border: 1px solid var(--edge-hi); transition: background .25s, box-shadow .25s;
+  }
+  .switch .knob::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--muted); transition: transform .25s cubic-bezier(.2,.8,.2,1), background .25s;
+  }
+  .switch input:checked + .knob { background: var(--grad); border-color: transparent; box-shadow: 0 0 14px rgba(34,228,255,.45); }
+  .switch input:checked + .knob::after { transform: translateX(18px); background: #fff; }
+  .switch input:checked ~ span:last-child { color: var(--text); }
+  .switch input:focus-visible + .knob { outline: 2px solid var(--c1); outline-offset: 2px; }
+  .switch.small { gap: 7px; font-size: .74rem; }
+  .switch.small .knob { width: 34px; height: 20px; }
+  .switch.small .knob::after { width: 12px; height: 12px; }
+  .switch.small input:checked + .knob::after { transform: translateX(14px); }
+
   @media (max-width: 520px) {
     header { flex-wrap: wrap; row-gap: 8px; }
     .navlinks { margin-left: 0; width: 100%; justify-content: space-between; }
@@ -319,6 +339,9 @@
     <div>
       <h2>Up next</h2>
       <div id="upNextBody" class="meta">Loading catalogue…</div>
+      <label class="switch" style="margin-top:14px">
+        <input type="checkbox" class="autoToggle"><span class="knob" aria-hidden="true"></span><span>Auto-play next</span>
+      </label>
     </div>
     <div class="ring" aria-hidden="true">
       <svg viewBox="0 0 110 110">
@@ -392,6 +415,9 @@
     <button class="small" id="back15">−15s</button>
     <button class="small" id="fwd30">+30s</button>
     <button class="small" id="rateBtn">1×</button>
+    <label class="switch small" title="Play the next unfinished episode when this one ends">
+      <input type="checkbox" class="autoToggle"><span class="knob" aria-hidden="true"></span><span>Auto-play</span>
+    </label>
     <button class="small" id="closePlayer">Close</button>
   </div>
 </div>
