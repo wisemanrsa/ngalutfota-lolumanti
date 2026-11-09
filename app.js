@@ -47,7 +47,7 @@
     var multi = e.uploads.length > 1;
     return e.uploads.map(function (u, i) {
       var lbl = multi ? 'Play ' + (i + 1) + ' · ' + fmtDur(u.dur) : 'Play · ' + fmtDur(u.dur);
-      return '<button class="small" data-play="' + e.num + ':' + i + '" title="' + esc(u.title) + '">▶ ' + lbl + '</button>' +
+      return '<button class="small" data-play="' + e.num + ':' + i + '" data-label="' + esc(lbl) + '" title="' + esc(u.title) + '">▶ ' + lbl + '</button>' +
         '<a class="btn small" href="' + esc(u.url) + '" target="_blank" rel="noopener" title="' + esc(u.title) + '">Omny' + (multi ? ' ' + (i + 1) : '') + ' ↗</a>';
     }).join('');
   }
@@ -105,7 +105,7 @@
       $('upNextBody').innerHTML = '<p class="up-ep" aria-label="Episode ' + next.num + '">' + next.num + '</p>' +
         '<div class="meta">' + esc(epDate(next)) + ' · ' + fmtDur(u.dur) + (next.uploads.length > 1 ? ' · ' + next.uploads.length + ' uploads' : '') +
         (r ? ' · <span class="resume">resume at ' + fmtTime(r.t) + '</span>' : '') + '</div>' +
-        '<div class="row" style="margin-top:12px"><button class="primary" data-play="' + next.num + ':' + (r ? r.i : next.primary) + '">▶ ' + (r ? 'Resume' : 'Listen') + '</button>' +
+        '<div class="row" style="margin-top:12px"><button class="primary" data-upnext="1" data-play="' + next.num + ':' + (r ? r.i : next.primary) + '" data-label="' + (r ? 'Resume' : 'Listen') + '">▶ ' + (r ? 'Resume' : 'Listen') + '</button>' +
         '<button data-finish-next="' + next.num + '">Finished, go to next</button></div>';
     } else {
       $('upNextBody').innerHTML = '<p class="up-ep caught">All caught up</p><div class="meta">Check for new episodes below.</div>';
@@ -137,6 +137,7 @@
       cat.available.forEach(function (n) { if (n >= g && n < g + 100) { have++; if (NL.isFinished(progress, n)) fin++; } });
       sums[j].textContent = fin + '/' + have + (fin === have && have ? ' ✓' : '');
     }
+    updatePlayButtons();
   }
 
   // ---------- catalogue load / refresh ----------
@@ -252,6 +253,25 @@
     }
   }
 
+  // Is the episode/upload behind this Play button the one loaded in the player?
+  // The Up next button matches any upload of its episode; list buttons match their own upload.
+  function isLoadedIn(btn) {
+    if (!current || !audio.src) return false;
+    var p = btn.getAttribute('data-play').split(':');
+    return current.num === +p[0] && (btn.hasAttribute('data-upnext') || current.idx === +p[1]);
+  }
+  // Play buttons show ⏸ Pause while their audio plays and ▶ Resume when it is paused.
+  function updatePlayButtons() {
+    var btns = document.querySelectorAll('[data-play]');
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i], loaded = isLoadedIn(b) && !audio.ended;
+      var text = loaded && !audio.paused ? '⏸ Pause' : loaded ? '▶ Resume' : '▶ ' + b.getAttribute('data-label');
+      if (b.textContent !== text) b.textContent = text;
+      b.classList.toggle('is-playing', loaded && !audio.paused);
+    }
+  }
+  ['play', 'playing', 'pause', 'ended', 'emptied'].forEach(function (ev) { audio.addEventListener(ev, updatePlayButtons); });
+
   audio.addEventListener('timeupdate', function () { savePos(false); });
   audio.addEventListener('pause', function () { savePos(true); document.body.classList.remove('playing'); });
   audio.addEventListener('playing', function () { document.body.classList.add('playing'); });
@@ -278,7 +298,7 @@
     var r = rates[(rates.indexOf(audio.playbackRate) + 1) % rates.length] || 1;
     audio.playbackRate = r; this.textContent = r + '×';
   };
-  $('closePlayer').onclick = function () { savePos(true); audio.pause(); $('player').classList.remove('on'); current = null; };
+  $('closePlayer').onclick = function () { savePos(true); audio.pause(); $('player').classList.remove('on'); current = null; updatePlayButtons(); };
 
   // ---------- events ----------
   document.addEventListener('click', function (ev) {
@@ -286,7 +306,11 @@
     if (!t) return;
     if (t.hasAttribute('data-play')) {
       var p = t.getAttribute('data-play').split(':');
-      play(+p[0], +p[1]);
+      if (isLoadedIn(t)) {
+        if (audio.paused) audio.play().catch(function () {}); else audio.pause();
+      } else {
+        play(+p[0], +p[1]);
+      }
     } else {
       var num = +t.getAttribute('data-finish-next');
       var wasPlaying = current && current.num === num;
